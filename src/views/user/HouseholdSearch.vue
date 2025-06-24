@@ -53,6 +53,7 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
+import request from '../../utils/request';
 
 const idNumber = ref("");
 const results = ref([]);
@@ -83,6 +84,10 @@ const handleSearch = async () => {
       params: { identity_card: query },
       // withCredentials: true
     });
+    // const response = await request.get("/people/research", {
+    //   params: { identity_card: query },
+    //   // withCredentials: true
+    // });
 
     console.log("完整响应：", response.data);
 

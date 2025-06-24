@@ -55,8 +55,11 @@ async function handleLogin() {
       }
     )
 
-    if (response.data.code === 200) {
+    if (response.data.code === "200") {
       // 读取后端返回的 Role Header（headers 名小写）
+      console.log(response);
+      // 存储后端返回的Token
+      localStorage.setItem(response.data.data.tokenName, response.data.data.tokenValue)
       const role = response.headers['role']
       if (role === 'admin') {
         router.push({ name: 'AdminLayout' })
