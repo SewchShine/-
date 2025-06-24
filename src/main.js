@@ -7,9 +7,9 @@ import 'element-plus/dist/index.css'
 
 import axios from 'axios'
 // 后端接口域名（按需替换）
-axios.defaults.baseURL = 'http://172.20.10.7:8080'
+// axios.defaults.baseURL = 'http://172.20.10.7:8080'
 // 全局携带 Cookie
-axios.defaults.withCredentials = true
+// axios.defaults.withCredentials = true
 
 
 const app = createApp(App)

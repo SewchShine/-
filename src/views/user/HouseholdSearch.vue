@@ -81,6 +81,7 @@ const handleSearch = async () => {
   try {
     const response = await axios.get("/people/research", {
       params: { identity_card: query },
+      // withCredentials: true
     });
 
     console.log("完整响应：", response.data);
