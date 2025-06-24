@@ -40,11 +40,6 @@
             <p>已审核：{{ stats.normal.reviewed }}</p>
             <p>等待中：{{ stats.normal.pending }}</p>
           </div>
-          <div class="summary-item">
-            <h4>加急申请</h4>
-            <p>已审核：{{ stats.express.reviewed }}</p>
-            <p>等待中：{{ stats.express.pending }}</p>
-          </div>
         </div>
       </div>
   
