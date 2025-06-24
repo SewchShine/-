@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // 仅代理以 /people 开头的请求
-      "^/people/.*": {
+      "^/user/.*": {
         target: "http://172.20.10.7:8080",
         changeOrigin: true,
       },
