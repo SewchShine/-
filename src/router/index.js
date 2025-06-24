@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
 
 // 管理员端
+import AdminHelloPage from '../views/admin/AdminHelloPage.vue'
 import AdminLayout from '../views/admin/AdminLayout.vue'
 import AccountCreate from '../views/admin/AccountCreate.vue'
 import AccountDelete from '../views/admin/AccountDelete.vue'
@@ -11,6 +12,7 @@ import AccountSearch from '../views/admin/AccountSearch.vue'
 import ReviewSubmission from '../views/admin/ReviewSubmission.vue'
 
 // 用户端
+import UserHelloPage from '../views/user/UserHelloPage.vue'
 import UserLayout from '../views/user/UserLayout.vue'
 import HouseholdSearch from '../views/user/HouseholdSearch.vue'
 import PopulationMoveIn from '../views/user/PopulationMoveIn.vue'
@@ -33,9 +35,10 @@ const routes = [
   // 管理员端（带子路由 + 左侧菜单）
   {
     path: '/admin',
+    name: 'AdminLayout',
     component: AdminLayout,
     children: [
-      { path: '', redirect: '/admin/create' }, // 默认跳转创建账号
+      { path: '', name: 'AdminHelloPage', component: AdminHelloPage }, // 默认跳转创建账号
       { path: 'create', name: 'AccountCreate', component: AccountCreate },
       { path: 'delete', name: 'AccountDelete', component: AccountDelete },
       { path: 'search', name: 'AccountSearch', component: AccountSearch },
@@ -46,9 +49,10 @@ const routes = [
   // 用户端（后续可以添加子路由）
   {
     path: '/user',
-    component:  UserLayout,
+    name: 'UserLayout',
+    component: UserLayout,
     children: [
-      { path: '', redirect: '/user/household/search' },
+      { path: '', name: 'UserHelloPage', component: UserHelloPage },
 
     // 户籍管理
     { path: 'household/search', component: HouseholdSearch },

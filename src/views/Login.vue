@@ -1,111 +1,102 @@
 <template>
-    <div class="login-container">
-      <div class="login-box">
-        <h2>人口信息管理系统</h2>
-        <form @submit.prevent="handleLogin">
-          <div class="form-group">
-            <label>用户名</label>
-            <input v-model="username" type="text" placeholder="请输入用户名" required />
-          </div>
-          <div class="form-group">
-            <label>密码</label>
-            <input v-model="password" type="password" placeholder="请输入密码" required />
-          </div>
-          <div class="form-group">
-            <label>角色</label>
-            <select v-model="role">
-              <option value="user">用户</option>
-              <option value="admin">管理员</option>
-            </select>
-          </div>
-          <button type="submit" class="login-btn">登录</button>
-        </form>
-      </div>
+  <div class="login-container">
+      <el-card class="login-card">
+        <h2 class="title">系统登录</h2>
+
+        <el-form :model="form" status-icon>
+          <el-form-item prop="username">
+            <el-input v-model="form.username" placeholder="用户名" />
+          </el-form-item>
+
+          <el-form-item prop="password">
+            <el-input
+              v-model="form.password"
+              type="password"
+              placeholder="密码"
+            />
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" block @click="handleLogin">
+              登录
+            </el-button>
+          </el-form-item>
+        </el-form>
+
+        <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
+      </el-card>
     </div>
   </template>
   
-  <script setup>
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
-  
-  const username = ref('')
-  const password = ref('')
-  const role = ref('user')
-  const router = useRouter()
-  
-  const handleLogin = () => {
-  if (role.value === 'user') {
-    router.push('/user/home')
-  } else {
-    router.push('/admin/home')
+<script setup>
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+
+const router = useRouter()
+const form = reactive({
+  username: '',
+  password: ''
+})
+const errorMsg = ref('')
+
+async function handleLogin() {
+  errorMsg.value = ''
+  try {
+    // 调用后端 /login 接口
+    const response = await axios.post(
+      '/login',
+      {
+        username: form.username,
+        password: form.password
+      },
+      {
+        withCredentials: true  // 确保接收并发送 Cookie
+      }
+    )
+
+    if (response.data.code === 200) {
+      // 读取后端返回的 Role Header（headers 名小写）
+      const role = response.headers['role']
+      if (role === 'admin') {
+        router.push({ name: 'AdminLayout' })
+      } else {
+        router.push({ name: 'UserLayout' })
+      }
+    } else {
+      // 登录失败，显示后端 msg
+      errorMsg.value = response.data.msg || '登录失败'
+    }
+  } catch (err) {
+    console.error('登录失败详情:', err)
+    // 网络错误或后端抛异常
+    errorMsg.value =
+      err.response?.data?.msg || '登录接口调用失败，请稍后重试'
   }
 }
+</script>
 
-  </script>
-  
-  <style scoped>
-  .login-container {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(to right, #6dd5ed, #2193b0);
-    font-family: 'Segoe UI', sans-serif;
-  }
-  
-  .login-box {
-    background-color: #ffffffee;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  h2 {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #333;
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  label {
-    margin-bottom: 8px;
-    color: #555;
-    font-size: 15px;
-  }
-  
-  input, select {
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    outline: none;
-  }
-  
-  input:focus, select:focus {
-    border-color: #2193b0;
-  }
-  
-  .login-btn {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    background-color: #2193b0;
-    color: white;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .login-btn:hover {
-    background-color: #19769c;
-  }
-  </style>
-  
+<style scoped>
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f0f2f5;
+}
+.login-card {
+  width: 320px;
+  padding: 24px;
+  border-radius: 8px;
+}
+.title {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+.error-msg {
+  color: #f56c6c;
+  text-align: center;
+  margin-top: 12px;
+}
+</style>

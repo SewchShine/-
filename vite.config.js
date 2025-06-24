@@ -8,27 +8,31 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // 仅代理以 /people 开头的请求
-      "^/people/.*": {
-        target: "http://172.20.10.7:8080",
-        changeOrigin: true,
-      },
-      // 仅代理以 /admin 开头的请求
-      "^/admin/.*": {
-        target: "http://172.20.10.7:8080",
-        changeOrigin: true,
-      },
-      "/birth/.*": {
-        target: "http://172.20.10.7:8080",
-        changeOrigin: true,
-      },
-      "/people": {
-        target: "http://172.20.10.7:8080",
-        changeOrigin: true,
-      },
-      "/death": {
-        target: "http://172.20.10.7:8080", 
-        changeOrigin: true,
-      },
+      // "^/people/.*": {
+      //   target: "http://172.20.10.7:8080",
+      //   changeOrigin: true,
+      // },
+      // // 仅代理以 /admin 开头的请求
+      // "^/admin/.*": {
+      //   target: "http://172.20.10.7:8080",
+      //   changeOrigin: true,
+      // },
+      // "/birth/.*": {
+      //   target: "http://172.20.10.7:8080",
+      //   changeOrigin: true,
+      // },
+      // "/people": {
+      //   target: "http://172.20.10.7:8080",
+      //   changeOrigin: true,
+      // },
+      // "/death": {
+      //   target: "http://172.20.10.7:8080", 
+      //   changeOrigin: true,
+      // },
+      // "/": {
+      //   target: "http://172.20.10.7:8080", 
+      //   changeOrigin: true,
+      // },
     },
   },
 });
