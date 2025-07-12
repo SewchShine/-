@@ -24,19 +24,19 @@
               <th>出生日期</th>
               <th>与户主关系</th>
               <th>户籍编号</th>
-              <th>户籍类型</th>
+              
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in results" :key="index">
               <td>{{ item.name }}</td>
-              <td>{{ item.identity_card }}</td>
-              <td>{{ item.sex }}</td>
-              <td>{{ item.nation }}</td>
+              <td>{{ item.identityCard }}</td>
+              <td>{{ sexMap[item.sex] || '未知' }}</td>
+              <td>{{ nationMap[item.nation] || '未知' }}</td>
               <td>{{ item.birthdate }}</td>
               <td>{{ item.householdName }}</td>
-              <td>{{ item.household_id }}</td>
-              <td>{{ item.household_type }}</td>
+              <td>{{ item.householdId }}</td>
+              
             </tr>
             <tr v-if="results.length === 0">
               <td colspan="8" style="text-align: center; color: #888">
@@ -51,72 +51,53 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import axios from "axios";
-import request from '../../utils/request';
+import { ref } from 'vue'
+import axios from 'axios'
 
-const idNumber = ref("");
-const results = ref([]);
+const idNumber = ref('')
+const results = ref([])
 
-// 工具函数：将驼峰转下划线
-const camelToSnake = (str) =>
-  str.replace(/[A-Z]/g, (letter) => "_" + letter.toLowerCase());
+const sexMap = {
+  1: '男',
+  2: '女'
+}
+const nationMap = {
+  1: '汉族',
+  2: '满族'
+}
 
-// 统一字段名为前端模板使用的下划线形式
-const normalizeData = (data) => {
-  const result = {};
-  for (const key in data) {
-    result[camelToSnake(key)] = data[key];
-  }
-  return result;
-};
-
-// 处理查询
 const handleSearch = async () => {
-  const query = idNumber.value.trim();
+  const query = idNumber.value.trim()
   if (!query) {
-    alert("请输入身份证号");
-    return;
+    alert('请输入身份证号')
+    return
   }
 
   try {
-    const response = await axios.get("/people/research", {
-      params: { identity_card: query },
-      // withCredentials: true
-    });
-    // const response = await request.get("/people/research", {
-    //   params: { identity_card: query },
-    //   // withCredentials: true
-    // });
+    const response = await axios.get('/people/research', {
+      params: { identity_card: query }
+    })
 
-    console.log("完整响应：", response.data);
-
-    const raw = response.data?.data;
+    const raw = response.data?.data
 
     if (!raw) {
-      results.value = [];
-      alert("未找到匹配记录");
-      return;
+      results.value = []
+      alert('未找到匹配记录')
+      return
     }
 
-    // 若是数组则批量处理，否则单个包装成数组
-    const normalized = Array.isArray(raw)
-      ? raw.map(normalizeData)
-      : [normalizeData(raw)];
-
-    results.value = normalized;
+    results.value = Array.isArray(raw) ? raw : [raw]
   } catch (error) {
-    console.error("查询失败：", error);
-    alert("查询失败，请稍后再试");
+    console.error('查询失败：', error)
+    alert('查询失败，请稍后再试')
   }
-};
+}
 </script>
-
 
 <style scoped>
 .household-query-page {
   min-height: 100vh;
-  background: linear-gradient(to right, #e6f0ff, #f4fcff); /* 温和渐变背景 */
+  background: linear-gradient(to right, #e6f0ff, #f4fcff);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -129,7 +110,7 @@ const handleSearch = async () => {
   padding: 40px 50px;
   width: 100%;
   max-width: 1000px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1); /* 增加阴影效果 */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
@@ -213,125 +194,17 @@ h2 {
 }
 
 .result-table tr:hover {
-  background-color: #f4fcff; /* 增加鼠标悬停效果 */
+  background-color: #f4fcff;
   cursor: pointer;
 }
 
 .result-table td {
   transition: background-color 0.3s;
+  font-size: 15px;
+  color: #333;
 }
 
 .result-table tr:hover td {
   background-color: #eef4fb;
-}
-
-/* 美化表格内容 */
-.result-table td {
-  font-size: 15px;
-  color: #333;
-}
-
-/* 弹窗样式 */
-.dialog-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: #fff;
-  border-radius: 16px;
-  padding: 40px 50px;
-  width: 450px;
-  max-width: 95vw;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  animation: fadeIn 0.3s ease;
-}
-
-.modal h3 {
-  margin-bottom: 20px;
-  text-align: center;
-  color: #333;
-  font-size: 22px;
-  font-weight: 600;
-}
-
-.form-group {
-  margin-bottom: 18px;
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #444;
-}
-
-.form-group input,
-.form-group select {
-  padding: 10px 12px;
-  font-size: 15px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  outline: none;
-  transition: border-color 0.3s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: #4aa9e9;
-  box-shadow: 0 2px 12px rgba(74, 169, 233, 0.3);
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.form-actions .btn {
-  min-width: 100px;
-  font-weight: 600;
-  padding: 10px 20px;
-}
-
-/* 修改按钮的美化 */
-.form-actions .btn.primary {
-  background-color: #2193b0;
-  color: white;
-}
-
-.form-actions .btn.primary:hover {
-  background-color: #19769c;
-}
-
-.form-actions .btn {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.form-actions .btn:hover {
-  background-color: #c0392b;
-}
-
-@keyframes fadeIn {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 </style>

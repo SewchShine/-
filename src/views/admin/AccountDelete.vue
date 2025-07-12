@@ -5,49 +5,43 @@
 
       <!-- 筛选区域 -->
       <div class="filter-section">
-        <label>
-          账号类型：
-          <select v-model="filter.role">
-            <option value="">全部</option>
-            <option value="super">高级管理员</option>
-            <option value="normal">普通管理员</option>
-          </select>
-        </label>
+        <label>选择查询方式：</label>
+        <select v-model="filterOption">
+          <option value="office_name">单位名称</option>
+          <option value="username">昵称</option>
+          <option value="loginId">登录名</option>
+          <option value="manage_area">管辖区划码</option>
+        </select>
 
-        <label>
-          单位名称：
-          <input
-            v-model="filter.unit"
-            type="text"
-            placeholder="请输入单位名称"
-          />
-        </label>
+        <input
+          v-model="filterValue"
+          type="text"
+          :placeholder="getPlaceholder(filterOption)"
+        />
 
         <button @click="filterAccounts" class="btn primary">筛选</button>
       </div>
 
       <!-- 表格展示 -->
-      <div class="table-wrapper">
+      <div class="table-wrapper" v-if="filteredAccounts.length > 0">
         <table class="result-table">
           <thead>
             <tr>
-              <th>用户名称</th>
-              <th>省</th>
-              <th>市</th>
-              <th>区/县</th>
-              <th>公安局名称</th>
+              <th>昵称</th>
+              <th>登录名</th>
               <th>密码</th>
+              <th>管辖区域</th>
+              <th>单位名称</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(acc, index) in filteredAccounts" :key="index">
               <td>{{ acc.username }}</td>
-              <td>{{ acc.province }}</td>
-              <td>{{ acc.city }}</td>
-              <td>{{ acc.county }}</td>
-              <td>{{ acc.unit }}</td>
+              <td>{{ acc.loginId}}</td>
               <td>{{ acc.password }}</td>
+              <td>{{ acc.manageArea }}</td>
+              <td>{{ acc.officeName }}</td>
               <td>
                 <button class="btn danger" @click="confirmDelete(index)">
                   删除
@@ -57,9 +51,11 @@
           </tbody>
         </table>
       </div>
+
+      <div v-else class="no-result">暂无数据，请尝试查询</div>
     </div>
 
-    <!-- 弹窗 -->
+    <!-- 确认弹窗 -->
     <div v-if="showConfirm" class="dialog-overlay">
       <div class="confirm-dialog">
         <p>确定删除该账号吗？</p>
@@ -73,40 +69,66 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref } from 'vue'
+import axios from 'axios'
 
-const filter = reactive({ role: "", unit: "" });
-import axios from "axios";
+const filterOption = ref('office_name')
+const filterValue = ref('')
+const filteredAccounts = ref([])
+const showConfirm = ref(false)
+const deleteIndex = ref(null)
+
+const getPlaceholder = (key) => {
+  switch (key) {
+    case 'office_name': return '请输入单位名称'
+    case 'username': return '请输入昵称'
+    case 'loginId': return '请输入登录名'
+    case 'manage_area': return '请输入管辖区划码'
+    default: return '请输入'
+  }
+}
 
 const filterAccounts = async () => {
-  try {
-    const response = await axios.get("/admin/list", {
-      params: {
-        role: filter.role,
-        unit: filter.unit,
-      },
-    });
-    filteredAccounts.value = response.data;
-  } catch (error) {
-    console.error("筛选失败：", error);
-    alert("获取账号列表失败");
+  if (!filterValue.value.trim()) {
+    alert('请输入查询值')
+    return
   }
-};
+
+  try {
+    const response = await axios.get('/admin/user', {
+      params: {
+        [filterOption.value]: filterValue.value.trim()
+      }
+    })
+
+    const list = response.data?.data || []
+    filteredAccounts.value = Array.isArray(list) ? list : []
+
+  } catch (error) {
+    console.error('筛选失败：', error)
+    alert('获取账号列表失败')
+  }
+}
+
+const confirmDelete = (index) => {
+  deleteIndex.value = index
+  showConfirm.value = true
+}
 
 const deleteAccount = async () => {
-  const targetAccount = filteredAccounts.value[deleteIndex.value];
+  const target = filteredAccounts.value[deleteIndex.value]
   try {
-    await axios.delete(`/api/admin/delete`, {
-      data: { login_id: targetAccount.username },
-    });
-    alert("删除成功");
-    showConfirm.value = false;
-    filterAccounts(); // 重新刷新列表
+    await axios.delete('/admin/user/', {
+      params: { userid: target.loginId }
+    })
+    alert('删除成功')
+    showConfirm.value = false
+    await filterAccounts() // 刷新数据
   } catch (error) {
-    console.error("删除失败：", error);
-    alert("删除失败，请稍后再试");
+    console.error('删除失败：', error)
+    alert('删除失败，请稍后重试')
   }
-};
+}
 </script>
 
 <style scoped>
@@ -137,28 +159,30 @@ h2 {
 .filter-section {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 16px;
   margin-bottom: 25px;
   align-items: center;
 }
 
 .filter-section label {
-  display: flex;
-  align-items: center;
   font-weight: 500;
   color: #444;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.filter-section input,
 .filter-section select {
-  margin-left: 10px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15px;
+  outline: none;
 }
 
 .btn {
-  padding: 8px 16px;
+  padding: 10px 18px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -193,6 +217,7 @@ h2 {
   border-collapse: collapse;
   border-radius: 12px;
   overflow: hidden;
+  background: #fff;
 }
 
 .result-table th,
@@ -205,6 +230,12 @@ h2 {
 
 .result-table tr:nth-child(even) {
   background-color: #f9f9f9;
+}
+
+.no-result {
+  text-align: center;
+  margin-top: 30px;
+  color: #999;
 }
 
 .dialog-overlay {

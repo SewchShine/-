@@ -1,33 +1,27 @@
 <template>
   <div class="login-container">
-      <el-card class="login-card">
-        <h2 class="title">系统登录</h2>
+    <div class="login-card">
+      <h2 class="title">人口管理系统</h2>
 
-        <el-form :model="form" status-icon>
-          <el-form-item prop="username">
-            <el-input v-model="form.username" placeholder="用户名" />
-          </el-form-item>
+      <form @submit.prevent="handleLogin">
+        <div class="form-group">
+          <label for="username">用户名</label>
+          <input type="text" id="username" v-model="form.username" placeholder="请输入用户名" required />
+        </div>
 
-          <el-form-item prop="password">
-            <el-input
-              v-model="form.password"
-              type="password"
-              placeholder="密码"
-            />
-          </el-form-item>
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" v-model="form.password" placeholder="请输入密码" required />
+        </div>
 
-          <el-form-item>
-            <el-button type="primary" block @click="handleLogin">
-              登录
-            </el-button>
-          </el-form-item>
-        </el-form>
+        <button type="submit" class="login-btn">登录</button>
 
         <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
-      </el-card>
+      </form>
     </div>
-  </template>
-  
+  </div>
+</template>
+
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -43,7 +37,6 @@ const errorMsg = ref('')
 async function handleLogin() {
   errorMsg.value = ''
   try {
-    // 调用后端 /login 接口
     const response = await axios.post(
       '/login',
       {
@@ -51,14 +44,11 @@ async function handleLogin() {
         password: form.password
       },
       {
-        withCredentials: true  // 确保接收并发送 Cookie
+        withCredentials: true
       }
     )
 
-    if (response.data.code === "200") {
-      // 读取后端返回的 Role Header（headers 名小写）
-      console.log(response);
-      // 存储后端返回的Token
+    if (response.data.code === '200') {
       localStorage.setItem(response.data.data.tokenName, response.data.data.tokenValue)
       const role = response.headers['role']
       if (role === 'admin') {
@@ -67,14 +57,11 @@ async function handleLogin() {
         router.push({ name: 'UserLayout' })
       }
     } else {
-      // 登录失败，显示后端 msg
       errorMsg.value = response.data.msg || '登录失败'
     }
   } catch (err) {
     console.error('登录失败详情:', err)
-    // 网络错误或后端抛异常
-    errorMsg.value =
-      err.response?.data?.msg || '登录接口调用失败，请稍后重试'
+    errorMsg.value = err.response?.data?.msg || '登录接口调用失败，请稍后重试'
   }
 }
 </script>
@@ -84,22 +71,86 @@ async function handleLogin() {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background: #f0f2f5;
+  background: linear-gradient(to right, #284d6d, #4b79a1);
+  min-height: 100vh;
+  padding: 20px;
 }
+
 .login-card {
-  width: 320px;
-  padding: 24px;
-  border-radius: 8px;
+  background: #ffffffee;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 100%;
+  box-sizing: border-box;
 }
+
 .title {
   text-align: center;
-  margin-bottom: 16px;
-  font-size: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 10px;
 }
-.error-msg {
-  color: #f56c6c;
+
+.subtitle {
   text-align: center;
-  margin-top: 12px;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+input {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  border-color: #19769c;
+  outline: none;
+}
+
+.login-btn {
+  background-color: #1d6fa5;
+  color: white;
+  font-size: 16px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+  background-color: #155b87;
+}
+
+.error-msg {
+  color: #d9534f;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
 }
 </style>

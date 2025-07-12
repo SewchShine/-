@@ -7,82 +7,81 @@
         <div class="form-grid">
           <div class="form-row">
             <label>公民身份证号码：</label>
-            <input v-model="form.identity_card" maxlength="18" required />
+            <input type="text" v-model="form.identity_card" maxlength="18" required />
           </div>
 
           <div class="form-row">
             <label>姓名：</label>
-            <input v-model="form.name" maxlength="30" required />
+            <input type="text" v-model="form.name" maxlength="30" required />
           </div>
 
           <div class="form-row">
             <label>性别：</label>
-            <select v-model.number="form.sex" required>
+            <select v-model="form.sex" required>
               <option value="">请选择</option>
-              <option :value="1">男</option>
-              <option :value="0">女</option>
+              <option value="1">男</option>
+              <option value="2">女</option>
             </select>
-          </div>
-
-          <div class="form-row">
-            <label>民族（数字）：</label>
-            <input v-model.number="form.nation" type="number" required />
           </div>
 
           <div class="form-row">
             <label>出生日期：</label>
-            <input v-model="form.birthdate" type="date" required />
+            <input type="date" v-model="form.birthdate" required />
           </div>
 
           <div class="form-row">
-            <label>出生地：</label>
-            <input v-model="form.birthplace" maxlength="100" required />
-          </div>
-
-          <div class="form-row">
-            <label>国籍（三字代码）：</label>
-            <input v-model="form.nationality" maxlength="3" required />
+            <label>民族代码：</label>
+            <input type="text" v-model="form.nation" maxlength="2" required />
           </div>
 
           <div class="form-row">
             <label>籍贯：</label>
-            <input v-model="form.native_of" maxlength="40" required />
+            <input type="text" v-model="form.native_of" maxlength="50" required />
+          </div>
+
+          <div class="form-row">
+            <label>出生地：</label>
+            <input type="text" v-model="form.birthplace" maxlength="50" required />
+          </div>
+
+          <div class="form-row">
+            <label>国籍代码：</label>
+            <input type="text" v-model="form.nationality" maxlength="3" required />
           </div>
 
           <div class="form-row">
             <label>与户主关系：</label>
-            <input v-model="form.household_name" maxlength="40" required />
+            <input type="text" v-model="form.household_name" maxlength="40" required />
           </div>
 
           <div class="form-row">
-            <label>居住地名称（可选）：</label>
-            <input v-model="form.household_placeid" maxlength="50" />
+            <label>居住地名称：</label>
+            <input type="text" v-model="form.household_placeid" maxlength="50" />
           </div>
 
           <div class="form-row">
-            <label>迁出日期（可选）：</label>
-            <input v-model="form.moveout_date" type="date" />
+            <label>户号（可选）：</label>
+            <input type="text" v-model="form.household_id" maxlength="20" />
           </div>
 
           <div class="form-row">
-            <label>迁出注销类别（可选）：</label>
-            <input v-model="form.moveout_type" maxlength="30" />
+            <label>何时迁来：</label>
+            <input type="date" v-model="form.movein_date" required />
           </div>
 
           <div class="form-row">
-            <label>迁往国家/地区（三字代码，可选）：</label>
-            <input v-model="form.moveout_country" maxlength="3" />
+            <label>何因迁来：</label>
+            <input type="text" v-model="form.movein_reason" maxlength="50" required />
           </div>
 
           <div class="form-row">
-            <label>状态：</label>
-            <select v-model.number="form.status" required>
-              <option value="">请选择</option>
-              <option :value="0">无效</option>
-              <option :value="1">有效</option>
-              <option :value="2">迁出中</option>
-              <option :value="3">已销户</option>
-            </select>
+            <label>何国家/地区来本地址：</label>
+            <input type="text" v-model="form.movein_country" maxlength="3" required />
+          </div>
+
+          <div class="form-row">
+            <label>何省市县(区)来本址：</label>
+            <input type="text" v-model="form.movein_city" maxlength="50" required />
           </div>
         </div>
 
@@ -102,38 +101,26 @@ const form = reactive({
   identity_card: '',
   name: '',
   sex: '',
-  nation: '',
   birthdate: '',
+  nation: '',
+  native_of: '',
   birthplace: '',
   nationality: '',
-  native_of: '',
   household_name: '',
   household_placeid: '',
-  moveout_date: '',
-  moveout_type: '',
-  moveout_country: '',
-  status: ''
+  household_id: '',
+  movein_date: '',
+  movein_reason: '',
+  movein_country: '',
+  movein_city: ''
 })
 
 const handleSubmit = async () => {
   try {
     const payload = {
-      identity_card: form.identity_card,
-      name: form.name,
-      sex: Number(form.sex),           // 整数
-      nation: Number(form.nation),     // 整数
-      birthdate: form.birthdate,
-      birthplace: form.birthplace,
-      nationality: form.nationality,
-      native_of: form.native_of,
-      household_name: form.household_name,
-      household_placeid: form.household_placeid || null,  // 可选
-      moveout_date: form.moveout_date || null,            // 可选
-      moveout_type: form.moveout_type || null,            // 可选
-      moveout_country: form.moveout_country || null,      // 可选
-      status: form.status === '' ? null : Number(form.status)  // 可选整数
+      ...form,
+      household_id: form.household_id || ''  // 空字符串作为默认值
     }
-
     await axios.put('/people/move-in', payload)
     alert('户口迁入申请提交成功！')
   } catch (error) {
@@ -142,45 +129,48 @@ const handleSubmit = async () => {
   }
 }
 
+const payload = {
+  ...form,
+  household_id: form.household_id || null  // 保证一定传值（可改成 '' 或 null）
+}
+
 </script>
 
 <style scoped>
 .move-in-page {
-  padding: 60px 20px;
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  padding: 40px;
+  background: linear-gradient(to right, #e6f0ff, #f4fcff);
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .form-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
+  background: white;
   padding: 40px 50px;
-  border-radius: 20px;
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 960px;
+  max-width: 900px;
 }
 
 h2 {
   text-align: center;
   margin-bottom: 35px;
-  font-size: 26px;
-  font-weight: bold;
   color: #333;
+  font-size: 26px;
+  font-weight: 700;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 25px;
 }
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 25px 40px;
 }
 
@@ -197,45 +187,40 @@ form {
 
 input[type='text'],
 input[type='date'],
-input[type='number'],
 select {
   padding: 10px 14px;
   border: 1px solid #ccc;
-  border-radius: 12px;
+  border-radius: 10px;
   font-size: 15px;
   width: 100%;
-  transition: all 0.3s;
-  background-color: #fff;
+  transition: border-color 0.3s;
 }
 
 input:focus,
 select:focus {
   border-color: #4aa9e9;
-  box-shadow: 0 0 6px rgba(74, 169, 233, 0.5);
-  outline: none;
+  box-shadow: 0 0 5px rgba(74, 169, 233, 0.5);
 }
 
 .form-actions {
   display: flex;
   justify-content: center;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .btn {
-  background: linear-gradient(to right, #2193b0, #6dd5ed);
+  background-color: #2193b0;
   color: white;
   font-size: 16px;
-  padding: 12px 40px;
+  padding: 12px 36px;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 12px rgba(33, 147, 176, 0.3);
+  font-weight: 600;
+  transition: background-color 0.3s;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(33, 147, 176, 0.4);
+  background-color: #19769c;
 }
 </style>
